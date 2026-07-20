@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#f2b9cc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>狗狗叠叠乐 3.1</title>
+<style>
+:root{
+ --ink:#4d3a35;--paper:#fff9ed;--pink:#f1a6be;--rose:#df7698;--gold:#e9b94f;
+ --mint:#99c7aa;--blue:#8fbfd8;--shadow:rgba(61,40,35,.24);--edge:#fff6;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none;background:#e9c7d2;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+button{font:inherit;color:inherit;border:0}
+.screen{position:fixed;inset:0;display:none}
+.screen.active{display:flex}
+.paperNoise{background:
+ radial-gradient(circle at 10% 10%,#fff7 0 2px,transparent 3px),
+ radial-gradient(circle at 80% 30%,#fff5 0 3px,transparent 4px),
+ linear-gradient(180deg,#f3bbcd,#f9d9c5)}
+#menu{align-items:center;justify-content:center;padding:22px}
+.menuShell{width:min(440px,95vw);border-radius:34px;padding:14px;background:#f5d9c8;border:4px solid #fff8;box-shadow:0 20px 50px #0003;position:relative;overflow:hidden}
+.menuShell:before,.menuShell:after{content:"";position:absolute;border-radius:50%;background:#fff3}
+.menuShell:before{width:170px;height:170px;right:-55px;top:-60px}.menuShell:after{width:120px;height:120px;left:-45px;bottom:-40px}
+.brandCard{position:relative;background:linear-gradient(160deg,#fff9,#ffe8ce);border:3px solid white;border-radius:26px;padding:22px 18px 18px;box-shadow:0 8px 20px var(--shadow);text-align:center}
+.logoDog{font-size:48px;filter:drop-shadow(0 4px 0 #fff)}.logo{font-size:33px;font-weight:1000;letter-spacing:1px;text-shadow:0 3px white}.tag{font-size:11px;opacity:.65;margin-top:5px}
+.saveStrip{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:13px 0}
+.slotBtn{background:#fff9;border:2px solid #fff;border-radius:15px;padding:9px 4px;box-shadow:0 4px 10px #0001;font-size:10px}
+.slotBtn.active{outline:3px solid #e685a3;background:#fff}.slotBtn b{display:block;font-size:13px}
+.currencyRow{display:flex;gap:7px;justify-content:center;margin-bottom:12px}.currency{background:#fff;border-radius:14px;padding:7px 10px;box-shadow:0 3px 9px #0001;font-size:11px}
+.menuBtn{position:relative;width:100%;padding:14px 12px 14px 58px;border-radius:18px;margin:7px 0;background:#fff;border:2px solid #fff;box-shadow:0 5px 13px var(--shadow);font-weight:900;text-align:left}
+.menuBtn i{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:35px;height:35px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:20px;background:#f6d4df}
+.menuBtn.primary{background:linear-gradient(135deg,#f391af,#f0bd69);color:white;text-shadow:0 1px #0002}.menuBtn.home{background:linear-gradient(135deg,#8fc9a6,#8ebfda);color:#fff}.menuBtn:active{transform:translateY(1px)}
+.topbar{height:72px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:max(8px,env(safe-area-inset-top)) 9px 8px;background:#fff8;backdrop-filter:blur(9px);border-bottom:2px solid #fff;box-shadow:0 4px 13px #0001;z-index:20}
+.topbar h2{margin:0;font-size:19px}.back,.pill{background:#fff;border:2px solid #fff;border-radius:14px;padding:8px 10px;box-shadow:0 3px 9px var(--shadow);font-size:11px}.back{font-weight:800}
+#run,#home{flex-direction:column}
+.runBody{flex:1;min-height:0;position:relative;background:linear-gradient(180deg,#f0bfd0,#f9e4c9)}
+#mapView,#battleView{position:absolute;inset:0;display:none}
+#mapView.active,#battleView.active{display:block}
+.mapWrap{height:100%;overflow:auto;padding:18px 14px 30px}
+.mapBanner{background:#fff9;border:3px solid #fff;border-radius:22px;padding:13px;text-align:center;box-shadow:0 7px 16px var(--shadow);margin-bottom:18px}.mapBanner b{font-size:18px}.mapBanner div{font-size:10px;opacity:.65}
+.path{display:flex;flex-direction:column;gap:17px;align-items:center}
+.row{width:100%;display:flex;justify-content:space-around;position:relative}.row:before{content:"";position:absolute;left:50%;top:-20px;width:3px;height:20px;background:#fff8;border-radius:3px}
+.node{width:84px;height:84px;border-radius:25px;background:#fff9;border:3px solid #fff;box-shadow:0 7px 15px var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:900}.node span{font-size:29px}.node.lock{opacity:.42;filter:grayscale(1)}.node.done{background:#ddf0df}.node.current{outline:4px solid #e982a2}
+#battleView{padding:7px 9px max(7px,env(safe-area-inset-bottom))}
+.battleGrid{height:100%;display:flex;flex-direction:column}
+.hud{height:62px;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding-bottom:6px}.hud div{background:#fff9;border:2px solid #fff;border-radius:14px;text-align:center;padding:6px 3px;box-shadow:0 4px 10px var(--shadow);font-size:9px}.hud b{display:block;font-size:15px}
+#stage{position:relative;flex:1;min-height:0;border:4px solid #fff;border-radius:28px 28px 18px 18px;overflow:hidden;box-shadow:0 13px 27px var(--shadow),inset 0 0 0 2px #d6aa8b;background:
+ linear-gradient(#fff3 1px,transparent 1px),linear-gradient(90deg,#fff3 1px,transparent 1px),
+ linear-gradient(180deg,#f6dfc7,#ecd0ae);background-size:24px 24px,24px 24px,auto}
+canvas{display:block;width:100%;height:100%}
+#danger{position:absolute;top:94px;left:0;right:0;border-top:2px dashed #cf5f7b;pointer-events:none}#danger:after{content:"危险线";position:absolute;right:8px;top:-18px;font-size:9px;background:#fff9;padding:2px 5px;border-radius:7px}
+#aim{position:absolute;top:0;height:95px;width:2px;background:linear-gradient(#9d6678,transparent);pointer-events:none}
+#nodeRule{position:absolute;left:8px;top:8px;z-index:4;background:#fff9;border:2px solid #fff;border-radius:14px;padding:7px 9px;font-size:10px;max-width:175px;box-shadow:0 4px 11px #0001}
+#nextCard{position:absolute;right:8px;top:8px;width:74px;height:69px;background:#fff9;border:2px solid #fff;border-radius:14px;text-align:center;font-size:9px;padding-top:2px;z-index:4;box-shadow:0 4px 11px #0001}
+#nextFace{width:54px;height:47px}
+.battleFoot{height:61px;display:flex;align-items:center;justify-content:space-between}.traits{font-size:9px;max-width:72%}.smallBtn{background:#fff;border-radius:14px;padding:9px 10px;box-shadow:0 4px 10px var(--shadow);font-weight:800}
+#home{background:linear-gradient(180deg,#cde7df,#f5e9d3)}
+.homeTabs{height:48px;display:flex;gap:7px;padding:7px 10px}.homeTabs button{flex:1;border-radius:14px;background:#fff8;border:2px solid #fff;box-shadow:0 3px 9px #0001;font-size:11px;font-weight:800}.homeTabs button.active{background:#fff}
+.homeScene{position:relative;flex:1;min-height:0;overflow:hidden;border-top:2px solid #fff;border-bottom:2px solid #fff}
+#petCanvas{position:absolute;inset:0}
+.homeOverlay{position:absolute;left:8px;right:8px;top:8px;display:flex;justify-content:space-between;pointer-events:none}.homeOverlay>*{pointer-events:auto}
+.petCard{background:#fff9;border:2px solid #fff;border-radius:15px;padding:8px 10px;box-shadow:0 4px 11px #0002;font-size:10px}
+.homeActions{height:82px;display:flex;gap:7px;overflow-x:auto;padding:8px 10px max(8px,env(safe-area-inset-bottom))}
+.homeAction{min-width:82px;background:#fff;border:2px solid #fff;border-radius:16px;box-shadow:0 4px 10px #0001;font-size:10px;padding:7px}.homeAction span{display:block;font-size:22px}
+.modal{position:fixed;inset:0;z-index:60;background:#49383388;display:none;align-items:center;justify-content:center;padding:17px}
+.panel{width:min(440px,96vw);max-height:88dvh;overflow:auto;background:#fff9ed;border:4px solid #fff;border-radius:28px;padding:18px;box-shadow:0 20px 55px #0004;text-align:center}
+.panel h2{margin:2px 0 7px}.panel p{font-size:11px;line-height:1.45}
+.cards{display:grid;gap:9px}.card{background:#fff;border:2px solid #ead8ca;border-radius:17px;padding:10px;text-align:left;box-shadow:0 3px 9px #0001}.card b{display:block}.card small{font-size:10px;opacity:.7}
+.shopGrid,.inventoryGrid,.dogGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.shopItem,.invItem,.dogItem{background:#fff;border:2px solid #ead8ca;border-radius:17px;padding:8px;text-align:left;box-shadow:0 4px 10px #0001}
+.shopArt{height:80px;border-radius:12px;background:linear-gradient(145deg,#f9dce8,#f8ebcd);display:flex;align-items:center;justify-content:center;margin-bottom:6px;overflow:hidden}.shopArt canvas{width:100%;height:100%}
+.rarity{font-size:9px;border-radius:7px;padding:2px 5px;display:inline-block;margin-top:3px}.common{background:#eee}.uncommon{background:#dff2df}.rare{background:#dfeeff}.epic{background:#eee2fa}.legendary{background:#ffe7a8}
+.wide{width:100%;padding:12px;border-radius:15px;background:#fff;box-shadow:0 4px 12px #0001;font-weight:800;margin-top:8px}
+#toast{position:fixed;z-index:90;left:50%;bottom:96px;transform:translateX(-50%) translateY(12px);background:#59443d;color:white;border-radius:13px;padding:8px 13px;font-size:11px;opacity:0;transition:.2s}
+</style>
+</head>
+<body>
+<section id="menu" class="screen active paperNoise">
+ <div class="menuShell">
+  <div class="brandCard">
+   <div class="logoDog">🐶</div><div class="logo">狗狗叠叠乐</div><div class="tag">手绘纸偶风 · 肉鸽闯关 · 狗狗之家</div>
+   <div class="saveStrip">
+    <button class="slotBtn active" data-slot="1"><b>档位 1</b><span>当前</span></button>
+    <button class="slotBtn" data-slot="2"><b>档位 2</b><span>新档</span></button>
+    <button class="slotBtn" data-slot="3"><b>档位 3</b><span>新档</span></button>
+   </div>
+   <div class="currencyRow"><div class="currency">🏡 狗币 <b id="menuHomeCoins">0</b></div><div class="currency">🐾 犬种 <b id="menuUnlocked">3</b></div></div>
+   <button class="menuBtn primary" id="startRun"><i>🎲</i>开始冒险</button>
+   <button class="menuBtn home" id="openHome"><i>🏠</i>进入狗狗之家</button>
+   <button class="menuBtn" id="openCollection"><i>📖</i>犬种图鉴</button>
+  </div>
+ </div>
+</section>
+
+<section id="run" class="screen">
+ <div class="topbar"><button class="back" id="leaveRun">← 主菜单</button><h2>冒险路线</h2><div class="pill">🪙 <b id="runCoins">0</b>　🏡 <b id="pendingHome">0</b></div></div>
+ <div class="runBody">
+  <div id="mapView" class="active"><div class="mapWrap"><div class="mapBanner"><b>第一章 · 暖阳街区</b><div>完成节点后沿路线前进，商店仅在商店节点开放</div></div><div id="path" class="path"></div></div></div>
+  <div id="battleView"><div class="battleGrid">
+   <div class="hud"><div><b id="battleBones">0</b>骨头</div><div><b id="battleGoal">0</b>目标</div><div><b id="battleDrops">0</b>剩余</div><div><b id="battleCoins">0</b>金币</div></div>
+   <div id="stage"><div id="nodeRule"></div><div id="nextCard">下一个<br><canvas id="nextFace" width="108" height="94"></canvas></div><div id="danger"></div><div id="aim"></div><canvas id="game"></canvas></div>
+   <div class="battleFoot"><div class="traits" id="traitText">暂无特性</div><button class="smallBtn" id="musicBtn">🎵</button></div>
+  </div></div>
+ </div>
+</section>
+
+<section id="home" class="screen">
+ <div class="topbar"><button class="back" id="leaveHome">← 主菜单</button><h2>狗狗之家</h2><div class="pill">🏡 <b id="homeCoins">0</b></div></div>
+ <div class="homeTabs"><button class="active" data-room="inside">室内</button><button data-room="outside">室外</button></div>
+ <div class="homeScene"><canvas id="petCanvas"></canvas><div class="homeOverlay"><div class="petCard"><b id="petName">奶狗</b><br>心情 <span id="petMood">😊</span>　饱腹 <span id="petFull">70</span></div><button class="petCard" id="switchPet">换狗</button></div></div>
+ <div class="homeActions"><button class="homeAction" id="feedBtn"><span>🍖</span>喂食</button><button class="homeAction" id="decorateBtn"><span>🛋️</span>装修</button><button class="homeAction" id="inventoryBtn"><span>🎒</span>仓库</button><button class="homeAction" id="petBtn"><span>🤲</span>摸摸</button><button class="homeAction" id="homeMusicBtn"><span>🎵</span>音乐</button></div>
+</section>
+
+<div class="modal" id="choiceModal"><div class="panel"><h2 id="choiceTitle"></h2><p id="choiceText"></p><div id="choiceList" class="cards"></div></div></div>
+<div class="modal" id="shopModal"><div class="panel"><h2>旅途商店</h2><p>只在商店节点开放。</p><div id="shopGrid" class="shopGrid"></div><button class="wide" id="closeShop">离开商店</button></div></div>
+<div class="modal" id="homeShopModal"><div class="panel"><h2 id="homeShopTitle">狗狗用品</h2><div id="homeShopGrid" class="inventoryGrid"></div><button class="wide closeModal">关闭</button></div></div>
+<div class="modal" id="collectionModal"><div class="panel"><h2>犬种图鉴</h2><p>每种犬种拥有独立立绘；解锁后可入住狗狗之家。</p><div id="dogGrid" class="dogGrid"></div><button class="wide closeModal">关闭</button></div></div>
+<div class="modal" id="resultModal"><div class="panel"><h2 id="resultTitle">结算</h2><p id="resultText"></p><button class="wide" id="resultContinue">继续</button></div></div>
+<div id="toast"></div>
+
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let currentSlot=1;
+const DOGS=[
+ {name:'奶狗',fur:'#f3d2aa',ear:'#c88f5d',kind:'round',rarity:'common'},
+ {name:'柯基',fur:'#e99c51',ear:'#a45e36',kind:'long',rarity:'common'},
+ {name:'柴犬',fur:'#d98549',ear:'#95502f',kind:'fox',rarity:'common'},
+ {name:'比熊',fur:'#fff9ef',ear:'#dfd1c4',kind:'cloud',rarity:'uncommon'},
+ {name:'法斗',fur:'#aaa19c',ear:'#5f5855',kind:'square',rarity:'uncommon'},
+ {name:'金毛',fur:'#dfad56',ear:'#a66b31',kind:'golden',rarity:'uncommon'},
+ {name:'哈士奇',fur:'#9aa7b4',ear:'#576674',kind:'husky',rarity:'rare'},
+ {name:'萨摩耶',fur:'#fffdf7',ear:'#ddd1c8',kind:'samoyed',rarity:'rare'},
+ {name:'阿拉斯加',fur:'#686b70',ear:'#363a41',kind:'malamute',rarity:'rare'},
+ {name:'边牧',fur:'#393c42',ear:'#22252a',kind:'collie',rarity:'rare'},
+ {name:'拉布拉多',fur:'#d4a05e',ear:'#855a35',kind:'lab',rarity:'uncommon'},
+ {name:'博美',fur:'#e8b16d',ear:'#a66e3d',kind:'pomeranian',rarity:'rare'},
+ {name:'巴哥',fur:'#c8ae86',ear:'#4d443e',kind:'pug',rarity:'uncommon'},
+ {name:'秋田犬',fur:'#d8a05e',ear:'#8f5b34',kind:'akita',rarity:'epic'},
+ {name:'伯恩山',fur:'#473c39',ear:'#221f1e',kind:'bernese',rarity:'epic'},
+ {name:'大丹犬',fur:'#8c8f96',ear:'#45484d',kind:'greatdane',rarity:'epic'},
+ {name:'月光萨摩耶',fur:'#dce9ff',ear:'#9eb7da',kind:'moon',rarity:'legendary'},
+ {name:'皇冠柯基',fur:'#f0a45c',ear:'#9e5631',kind:'royalcorgi',rarity:'legendary'}
+];
+const ITEMS=[
+ {id:'kibble',name:'基础狗粮',icon:'🥣',type:'food',rarity:'common',price:25,full:15},
+ {id:'chicken',name:'鸡胸肉',icon:'🍗',type:'food',rarity:'uncommon',price:55,full:28},
+ {id:'salmon',name:'三文鱼餐',icon:'🍣',type:'food',rarity:'rare',price:110,full:45},
+ {id:'steak',name:'豪华牛排',icon:'🥩',type:'food',rarity:'epic',price:220,full:70},
+ {id:'bed',name:'软垫狗窝',icon:'🧺',type:'decor',room:'inside',rarity:'common',price:90},
+ {id:'sofa',name:'奶油沙发',icon:'🛋️',type:'decor',room:'inside',rarity:'rare',price:260},
+ {id:'castle',name:'城堡狗窝',icon:'🏰',type:'decor',room:'inside',rarity:'legendary',price:720},
+ {id:'tree',name:'院子小树',icon:'🌳',type:'decor',room:'outside',rarity:'common',price:120},
+ {id:'fountain',name:'骨头喷泉',icon:'⛲',type:'decor',room:'outside',rarity:'epic',price:420},
+ {id:'pool',name:'狗狗泳池',icon:'🏊',type:'decor',room:'outside',rarity:'legendary',price:880}
+];
+function fresh(){return{homeCoins:100,unlocked:[0,1,2],inventory:{kibble:2},placed:{inside:[],outside:[]},pet:0,room:'inside',petStats:{},bestLayer:0}}
+let state=loadSlot(currentSlot);
+function key(){return'dogStackRogue31_slot_'+currentSlot}
+function loadSlot(n){try{return JSON.parse(localStorage.getItem('dogStackRogue31_slot_'+n))||fresh()}catch(e){return fresh()}}
+function save(){localStorage.setItem(key(),JSON.stringify(state));updatePersistentUI()}
+function stat(i){return state.petStats[i]||(state.petStats[i]={full:70,mood:70})}
+function toast(t){let e=$('#toast');e.textContent=t;e.style.opacity=1;e.style.transform='translateX(-50%) translateY(0)';clearTimeout(toast.t);toast.t=setTimeout(()=>{e.style.opacity=0;e.style.transform='translateX(-50%) translateY(12px)'},1200)}
+function show(id){$$('.screen').forEach(e=>e.classList.remove('active'));$(id).classList.add('active');setTimeout(resize,30)}
+function rarityName(r){return({common:'普通',uncommon:'优秀',rare:'稀有',epic:'史诗',legendary:'传说'})[r]}
+function updatePersistentUI(){$('#menuHomeCoins').textContent=$('#homeCoins').textContent=state.homeCoins;$('#menuUnlocked').textContent=state.unlocked.length;$$('.slotBtn').forEach(b=>{let s=loadSlot(+b.dataset.slot);b.querySelector('span').textContent=(+b.dataset.slot===currentSlot?'当前':(localStorage.getItem('dogStackRogue31_slot_'+b.dataset.slot)?'已有档':'新档'));b.classList.toggle('active',+b.dataset.slot===currentSlot)})}
+updatePersistentUI();
+
+let audio=null,musicOn=true,homeMusicOn=true,musicTimer=null,homeTimer=null,step=0;
+function ensureAudio(){try{audio ||= new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}
+function tone(freq,dur=.16,type='sine',vol=.018,delay=0){if(!audio)return;let o=audio.createOscillator(),g=audio.createGain(),now=audio.currentTime+delay;o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(vol,now);g.gain.exponentialRampToValueAtTime(.0001,now+dur);o.connect(g);g.connect(audio.destination);o.start(now);o.stop(now+dur)}
+function activateAudio(){ensureAudio();audio&&audio.resume()}
+function startRunMusic(){clearInterval(musicTimer);if(!musicOn)return;activateAudio();let notes=[261.6,329.6,392,523.2,392,329.6,293.7,349.2,440,587.3,440,349.2];musicTimer=setInterval(()=>{if(!run||paused||!$('#run').classList.contains('active'))return;let n=notes[step++%notes.length];tone(n,.42,'triangle',.011);if(step%4===1)tone(n/2,.55,'sine',.006)},360)}
+function startHomeMusic(){clearInterval(homeTimer);if(!homeMusicOn)return;activateAudio();let notes=[220,277.2,329.6,277.2,246.9,293.7,370,293.7];homeTimer=setInterval(()=>{if(!$('#home').classList.contains('active'))return;let n=notes[step++%notes.length];tone(n,.65,'sine',.008)},520)}
+document.addEventListener('pointerdown',activateAudio,{once:true});
+
+let run=null;
+const mapRows=[[{type:'battle',icon:'🐾',name:'普通关'}],[{type:'battle',icon:'🐾',name:'普通关'},{type:'event',icon:'❓',name:'事件'}],[{type:'shop',icon:'🛒',name:'商店'},{type:'elite',icon:'⚔️',name:'精英关'}],[{type:'battle',icon:'🐾',name:'普通关'},{type:'treasure',icon:'🎁',name:'宝箱'}],[{type:'boss',icon:'👑',name:'街区首领'}]];
+function startRun(){activateAudio();run={layer:0,row:0,coins:35,pendingHome:0,traits:{},deck:[0,0,0,1,1,2],battle:null};buildMap();updateRunUI();show('#run');startRunMusic()}
+function buildMap(){let p=$('#path');p.innerHTML='';mapRows.forEach((row,ri)=>{let r=document.createElement('div');r.className='row';row.forEach(n=>{let b=document.createElement('button');b.className='node';if(ri<run.row)b.classList.add('done');if(ri>run.row)b.classList.add('lock');if(ri===run.row)b.classList.add('current');b.innerHTML=`<span>${n.icon}</span>${n.name}`;b.onclick=()=>{if(ri===run.row)enterNode(n)};r.appendChild(b)});p.appendChild(r)})}
+function enterNode(n){if(['battle','elite','boss'].includes(n.type))startBattle(n.type);else if(n.type==='shop')openRunShop();else if(n.type==='event')openEvent();else openTreasure()}
+function completeNode(){run.row++;run.layer++;run.pendingHome+=[0,45,80,130,200,350][Math.min(5,run.layer)];state.bestLayer=Math.max(state.bestLayer,run.layer);if(run.row>=mapRows.length){finishRun(true);return}buildMap();updateRunUI();$('#mapView').classList.add('active');$('#battleView').classList.remove('active')}
+function finishRun(win){state.homeCoins+=run.pendingHome;save();$('#resultTitle').textContent=win?'章节完成！':'冒险结束';$('#resultText').innerHTML=`到达第 ${run.layer} 层<br>获得永久狗币 <b>${run.pendingHome}</b> 🏡`;$('#resultModal').style.display='flex';$('#resultContinue').onclick=()=>{$('#resultModal').style.display='none';run=null;clearInterval(musicTimer);show('#menu')}}
+function updateRunUI(){$('#runCoins').textContent=run?.coins||0;$('#pendingHome').textContent=run?.pendingHome||0;$('#battleCoins').textContent=run?.coins||0}
+function openChoices(title,text,choices,after){$('#choiceTitle').textContent=title;$('#choiceText').textContent=text;let box=$('#choiceList');box.innerHTML='';choices.forEach(c=>{let b=document.createElement('button');b.className='card';b.innerHTML=`<b>${c[0]}</b>`;b.onclick=()=>{c[1]();$('#choiceModal').style.display='none';updateRunUI();after&&after()};box.appendChild(b)});$('#choiceModal').style.display='flex'}
+function unlockRandom(){let pool=DOGS.map((_,i)=>i).filter(i=>!state.unlocked.includes(i));if(!pool.length){run.coins+=60;toast('犬种已全部解锁，改为60金币');return}let id=pool[(Math.random()*pool.length)|0];state.unlocked.push(id);save();toast('解锁 '+DOGS[id].name)}
+function openEvent(){openChoices('流浪狗','一只小狗一路跟着你。',[['收养它：解锁随机犬种',unlockRandom],['给食物：-20金币，狗缩小',()=>{if(run.coins>=20){run.coins-=20;run.traits.tiny=(run.traits.tiny||0)+1}}],['挥手告别',()=>{}]],completeNode)}
+function openTreasure(){openChoices('宝箱','选择一项奖励。',[['黄金项圈：金币收益提高',()=>run.traits.rich=(run.traits.rich||0)+1],['迷你狗粮：新狗缩小',()=>run.traits.tiny=(run.traits.tiny||0)+1],['领养券：解锁犬种',unlockRandom]],completeNode)}
+function openRunShop(){let stock=[{name:'迷你狗粮',icon:'🥣',price:45,desc:'所有新狗缩小6%',buy:()=>run.traits.tiny=(run.traits.tiny||0)+1},{name:'幸运项圈',icon:'🎀',price:70,desc:'合成金币增加40%',buy:()=>run.traits.rich=(run.traits.rich||0)+1},{name:'领养犬种',icon:'🐶',price:95,desc:'随机解锁一种犬种',buy:unlockRandom},{name:'精简牌组',icon:'✂️',price:55,desc:'移除一张最低级狗',buy:()=>{if(run.deck.length>3)run.deck.splice(run.deck.indexOf(Math.min(...run.deck)),1)}}];let g=$('#shopGrid');g.innerHTML='';stock.forEach(it=>{let b=document.createElement('button');b.className='shopItem';b.innerHTML=`<div class="shopArt">${it.icon}</div><b>${it.name}</b><small>${it.desc}</small><div>${it.price} 🪙</div>`;b.onclick=()=>{if(run.coins<it.price){toast('金币不够');return}run.coins-=it.price;it.buy();b.disabled=true;b.style.opacity=.45;updateRunUI()};g.appendChild(b)});$('#shopModal').style.display='flex'}
+$('#closeShop').onclick=()=>{$('#shopModal').style.display='none';completeNode()};
+
+const canvas=$('#game'),ctx=canvas.getContext('2d'),nextCtx=$('#nextFace').getContext('2d'),petCanvas=$('#petCanvas'),petCtx=petCanvas.getContext('2d');
+let W=360,H=500,DPR=1,last=performance.now(),dropX=180,drag=false,paused=true,dangerTime=0;
+function resize(){let r=canvas.getBoundingClientRect();if(r.width&&r.height){DPR=Math.min(devicePixelRatio||1,2);W=r.width;H=r.height;canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);dropX=Math.max(40,Math.min(W-40,dropX))}let pr=petCanvas.getBoundingClientRect();if(pr.width&&pr.height){petCanvas.width=Math.round(pr.width*DPR);petCanvas.height=Math.round(pr.height*DPR);petCtx.setTransform(DPR,0,0,DPR,0,0)}}
+new ResizeObserver(resize).observe(document.body);
+
+function dimensions(t,sc=1){let k=DOGS[t].kind,w=48,h=46;if(['long','royalcorgi'].includes(k)){w=67;h=39}else if(['golden','lab'].includes(k)){w=64;h=43}else if(['greatdane'].includes(k)){w=74;h=53}else if(['square','pug'].includes(k)){w=55;h=51}else if(['samoyed','moon','cloud','pomeranian'].includes(k)){w=67;h=63}else if(['malamute','bernese'].includes(k)){w=79;h=64}return[w*sc,h*sc]}
+function shapeParts(t){let k=DOGS[t].kind;if(['long','golden','lab','greatdane'].includes(k))return[[-.28,0,.31],[0,0,.34],[.28,0,.31]];if(['cloud','samoyed','pomeranian','moon'].includes(k))return[[-.24,-.08,.28],[0,-.16,.30],[.24,-.08,.28],[-.17,.19,.28],[.17,.19,.28]];if(['square','pug','bernese','malamute'].includes(k))return[[-.22,-.16,.31],[.22,-.16,.31],[-.22,.18,.31],[.22,.18,.31]];return[[0,-.18,.31],[-.23,.09,.30],[.23,.09,.30],[0,.24,.28]]}
+function newBody(t,x,y){let sc=Math.max(.72,1-(run.traits.tiny||0)*.06),[w,h]=dimensions(t,sc);return{type:t,x,y,vx:0,vy:0,rot:0,av:0,w,h,mass:(w*h)/1800,born:performance.now()}}
+function parts(b){let c=Math.cos(b.rot),s=Math.sin(b.rot),m=Math.min(b.w,b.h);return shapeParts(b.type).map(p=>{let lx=p[0]*b.w,ly=p[1]*b.h;return{x:b.x+lx*c-ly*s,y:b.y+lx*s+ly*c,r:p[2]*m}})}
+
+function drawDog(c,x,y,size,t,rot=0,full=false,emotion='happy'){
+ const d=DOGS[t],k=d.kind;c.save();c.translate(x,y);c.rotate(rot);let sc=size/76;c.scale(sc,sc);c.shadowColor='#0002';c.shadowBlur=8;c.shadowOffsetY=4;
+ if(full){c.fillStyle=d.fur;c.beginPath();c.ellipse(0,15,27,17,0,0,7);c.fill();c.fillStyle=d.ear;c.beginPath();c.roundRect(-22,22,8,22,4);c.roundRect(14,22,8,22,4);c.fill();c.strokeStyle=d.ear;c.lineWidth=7;c.beginPath();c.arc(26,14,14,-1.15,.8);c.stroke()}
+ c.fillStyle=d.ear;if(['golden','lab'].includes(k)){c.beginPath();c.ellipse(-23,-3,10,23,-.25,0,7);c.ellipse(23,-3,10,23,.25,0,7);c.fill()}else{c.beginPath();c.moveTo(-24,-9);c.lineTo(-14,-35);c.lineTo(-4,-12);c.moveTo(24,-9);c.lineTo(14,-35);c.lineTo(4,-12);c.fill()}
+ c.fillStyle=d.fur;
+ if(['long','royalcorgi'].includes(k)){c.beginPath();c.roundRect(-35,-20,70,42,18);c.fill()}
+ else if(['cloud','samoyed','pomeranian','moon'].includes(k)){for(let i=0;i<10;i++){let a=i*Math.PI/5;c.beginPath();c.arc(Math.cos(a)*23,Math.sin(a)*20,14,0,7);c.fill()}c.beginPath();c.arc(0,0,25,0,7);c.fill()}
+ else if(['square','pug'].includes(k)){c.beginPath();c.roundRect(-29,-25,58,52,15);c.fill()}
+ else if(['greatdane','malamute','bernese'].includes(k)){c.beginPath();c.roundRect(-37,-28,74,58,18);c.fill()}
+ else{c.beginPath();c.moveTo(0,-29);c.lineTo(29,-5);c.lineTo(18,29);c.lineTo(-18,29);c.lineTo(-29,-5);c.closePath();c.fill()}
+ if(['husky','malamute','collie','bernese'].includes(k)){c.fillStyle='#fff7ed';c.beginPath();c.moveTo(-22,-8);c.lineTo(-6,-16);c.lineTo(0,2);c.lineTo(6,-16);c.lineTo(22,-8);c.lineTo(15,17);c.lineTo(-15,17);c.closePath();c.fill()}
+ else{c.fillStyle='#fff7ed';c.beginPath();c.ellipse(0,9,17,13,0,0,7);c.fill()}
+ c.fillStyle='#3e302c';c.beginPath();c.arc(-8,-4,2.8,0,7);c.arc(8,-4,2.8,0,7);c.fill();c.beginPath();c.ellipse(0,7,5,3.4,0,0,7);c.fill();
+ c.strokeStyle='#65483f';c.lineWidth=2;c.beginPath();c.moveTo(0,10);if(emotion==='sad'){c.quadraticCurveTo(-7,7,-12,13);c.moveTo(0,10);c.quadraticCurveTo(7,7,12,13)}else{c.quadraticCurveTo(-7,18,-13,13);c.moveTo(0,10);c.quadraticCurveTo(7,18,13,13)}c.stroke();
+ if(k==='royalcorgi'){c.fillStyle='#efc54c';c.beginPath();c.moveTo(-18,-24);c.lineTo(-10,-44);c.lineTo(0,-28);c.lineTo(10,-44);c.lineTo(19,-24);c.closePath();c.fill()}
+ c.restore()
+}
+function pickDeck(){return run.deck[(Math.random()*run.deck.length)|0]}
+function startBattle(kind){
+ activateAudio();resize();let mult=kind==='elite'?1.6:kind==='boss'?2.2:1;
+ run.battle={kind,bodies:[],bones:0,goal:Math.round((115+run.layer*55)*mult),drops:12+run.layer,current:pickDeck(),next:pickDeck()};
+ paused=false;dangerTime=0;$('#mapView').classList.remove('active');$('#battleView').classList.add('active');$('#nodeRule').innerHTML=(kind==='elite'?'精英关：高目标，高奖励':kind==='boss'?'首领：场地更窄':'普通关')+'<br>拖动顶部狗狗，松手投放';updateBattleUI();startRunMusic()
+}
+function updateBattleUI(){let b=run.battle;$('#battleBones').textContent=b.bones;$('#battleGoal').textContent=b.goal;$('#battleDrops').textContent=b.drops;$('#traitText').textContent=Object.keys(run.traits).length?'特性：'+Object.keys(run.traits).join('、'):'暂无特性';updateRunUI();nextCtx.clearRect(0,0,108,94);drawDog(nextCtx,54,48,52,b.next,0,false)}
+function deepest(a,b){let best=null;for(let pa of parts(a))for(let pb of parts(b)){let dx=pb.x-pa.x,dy=pb.y-pa.y,d=Math.hypot(dx,dy)||.001,p=pa.r+pb.r-d;if(p>0&&(!best||p>best.p))best={dx,dy,d,p}}return best}
+function solve(a,b,c){let nx=c.dx/c.d,ny=c.dy/c.d,ia=1/a.mass,ib=1/b.mass,sum=ia+ib,corr=Math.max(0,c.p-.3)*.72/sum;a.x-=nx*corr*ia;a.y-=ny*corr*ia;b.x+=nx*corr*ib;b.y+=ny*corr*ib;let rv=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;if(rv<0){let e=.2+(run.traits.bouncy||0)*.06,j=Math.min(220,-(1+e)*rv/sum);a.vx-=j*nx*ia;a.vy-=j*ny*ia;b.vx+=j*nx*ib;b.vy+=j*ny*ib}}
+function merge(a,b){let t=a.type;run.battle.bodies=run.battle.bodies.filter(x=>x!==a&&x!==b);let gain=7*(t+1)*(t+1),cash=Math.max(1,Math.round((t+1)*(1+(run.traits.rich||0)*.4)));run.battle.bones+=gain;run.coins+=cash;if(t<DOGS.length-1){let n=newBody(t+1,(a.x+b.x)/2,(a.y+b.y)/2);n.vy=-55;run.battle.bodies.push(n)}tone(420+t*35,.12,'triangle',.028);updateBattleUI()}
+function physics(dt){
+ if(!run?.battle||paused)return;let B=run.battle,subs=4,st=dt/subs,left=B.kind==='boss'?18:4,right=B.kind==='boss'?W-18:W-4;
+ for(let s=0;s<subs;s++){for(let b of B.bodies){b.vy+=900*st;b.vx=Math.max(-600,Math.min(600,b.vx));b.vy=Math.max(-680,Math.min(900,b.vy));b.x+=b.vx*st;b.y+=b.vy*st;b.rot+=b.av*st;b.av*=.99;for(let p of parts(b)){if(p.x-p.r<left){b.x+=left-(p.x-p.r);b.vx=Math.abs(b.vx)*.16}if(p.x+p.r>right){b.x-=(p.x+p.r)-right;b.vx=-Math.abs(b.vx)*.16}if(p.y+p.r>H-3){b.y-=(p.y+p.r)-(H-3);b.vy=-Math.abs(b.vy)*.1;b.vx*=.88}}}
+ for(let it=0;it<4;it++){let merged=false;outer:for(let i=0;i<B.bodies.length;i++)for(let j=i+1;j<B.bodies.length;j++){let a=B.bodies[i],b=B.bodies[j],c=deepest(a,b);if(!c)continue;if(a.type===b.type&&performance.now()-a.born>120&&performance.now()-b.born>120){merge(a,b);merged=true;break outer}else solve(a,b,c)}if(merged)continue}}
+ let crowded=B.bodies.some(b=>performance.now()-b.born>1500&&parts(b).some(p=>p.y-p.r<94)&&Math.hypot(b.vx,b.vy)<60);dangerTime=crowded?dangerTime+dt:Math.max(0,dangerTime-dt*2);if(dangerTime>2.5)battleEnd(false)
+}
+function drawBattle(){ctx.clearRect(0,0,W,H);if(!run?.battle)return;drawDog(ctx,dropX,46,Math.max(...dimensions(run.battle.current)),run.battle.current,0,false);run.battle.bodies.forEach(b=>drawDog(ctx,b.x,b.y,Math.max(b.w,b.h),b.type,b.rot,false));if(dangerTime){ctx.fillStyle=`rgba(220,70,100,${Math.min(.16,dangerTime*.06)})`;ctx.fillRect(0,0,W,96)}}
+function drop(){if(paused||!run?.battle||run.battle.drops<=0)return;let B=run.battle,n=newBody(B.current,Math.max(38,Math.min(W-38,dropX)),48);B.bodies.push(n);B.current=B.next;B.next=pickDeck();B.drops--;tone(250,.07,'sine',.025);updateBattleUI();if(B.drops===0)setTimeout(()=>battleEnd(B.bones>=B.goal),2200)}
+function battleEnd(success){if(paused)return;paused=true;let B=run.battle;if(success){let reward=B.kind==='boss'?100:B.kind==='elite'?55:30;run.coins+=reward;openChoices('过关！',`完成目标 ${B.bones}/${B.goal}，获得 ${reward} 金币。`,[['迷你狗粮',()=>run.traits.tiny=(run.traits.tiny||0)+1],['幸运项圈',()=>run.traits.rich=(run.traits.rich||0)+1],['解锁犬种',unlockRandom]],()=>{run.battle=null;completeNode()})}else{run.battle=null;finishRun(false)}}
+function pointerX(e){let r=canvas.getBoundingClientRect(),p=e.touches?e.touches[0]:e;return p.clientX-r.left}
+function down(e){if(paused||!run?.battle)return;drag=true;move(e);activateAudio();e.preventDefault()}
+function move(e){if(!drag)return;dropX=Math.max(38,Math.min(W-38,pointerX(e)));$('#aim').style.left=(dropX-1)+'px';e.preventDefault()}
+function up(e){if(!drag)return;drag=false;drop();e.preventDefault()}
+canvas.addEventListener('touchstart',down,{passive:false});canvas.addEventListener('touchmove',move,{passive:false});canvas.addEventListener('touchend',up,{passive:false});canvas.addEventListener('mousedown',down);window.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
+
+let petPos={x:180,y:260},dragTarget=null,petTime=0;
+function roomObjects(){return state.placed[state.room]}
+function normalizePlaced(){for(let room of ['inside','outside'])state.placed[room]=state.placed[room].map((x,i)=>typeof x==='string'?{id:x,x:55+i*65,y:330-(i%2)*55,rot:0}:x)}
+normalizePlaced();
+function drawRoom(){let c=petCtx,w=petCanvas.clientWidth,h=petCanvas.clientHeight;c.clearRect(0,0,w,h);if(state.room==='inside'){c.fillStyle='#f6e5cf';c.fillRect(0,0,w,h);c.fillStyle='#d2a981';c.fillRect(0,h*.68,w,h*.32);c.fillStyle='#b7d6e7';c.fillRect(w*.12,h*.12,w*.3,h*.26);c.fillStyle='#fff8';c.fillRect(w*.14,h*.14,w*.12,h*.22)}else{let g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#bfe0ef');g.addColorStop(.58,'#dff1d0');g.addColorStop(.59,'#99c97b');g.addColorStop(1,'#78aa5f');c.fillStyle=g;c.fillRect(0,0,w,h);c.fillStyle='#fff8';c.beginPath();c.arc(w*.82,h*.14,33,0,7);c.fill()}
+ roomObjects().forEach((o,i)=>{let it=ITEMS.find(x=>x.id===o.id);if(!it)return;c.save();c.translate(o.x,o.y);c.rotate(o.rot||0);c.font='46px sans-serif';c.textAlign='center';c.fillText(it.icon,0,0);c.restore()});
+ let st=stat(state.pet),emotion=st.mood<35?'sad':'happy';drawDog(c,petPos.x,petPos.y+Math.sin(petTime)*2,108,state.pet,0,true,emotion)}
+function hitObject(x,y){let objs=roomObjects();for(let i=objs.length-1;i>=0;i--){let o=objs[i];if(Math.hypot(x-o.x,y-o.y)<38)return{type:'decor',index:i,o}}if(Math.hypot(x-petPos.x,y-petPos.y)<55)return{type:'pet'};return null}
+function petPointer(e){let r=petCanvas.getBoundingClientRect(),p=e.touches?e.touches[0]:e;return{x:p.clientX-r.left,y:p.clientY-r.top}}
+function petDown(e){let p=petPointer(e);dragTarget=hitObject(p.x,p.y);if(!dragTarget){petPos=p;dragTarget={type:'pet'}}e.preventDefault()}
+function petMove(e){if(!dragTarget)return;let p=petPointer(e);if(dragTarget.type==='pet')petPos=p;else{let o=roomObjects()[dragTarget.index];o.x=p.x;o.y=p.y}e.preventDefault()}
+function petUp(e){if(!dragTarget)return;if(dragTarget.type==='decor'){let o=roomObjects()[dragTarget.index];o.rot=((o.rot||0)+.08)%(Math.PI*2);toast('家具已重新摆放')}else{let st=stat(state.pet);st.mood=Math.min(100,st.mood+2);toast(DOGS[state.pet].name+'摇了摇尾巴')}dragTarget=null;save();e.preventDefault()}
+petCanvas.addEventListener('touchstart',petDown,{passive:false});petCanvas.addEventListener('touchmove',petMove,{passive:false});petCanvas.addEventListener('touchend',petUp,{passive:false});petCanvas.addEventListener('mousedown',petDown);window.addEventListener('mousemove',e=>{if(dragTarget)petMove(e)});window.addEventListener('mouseup',e=>{if(dragTarget)petUp(e)});
+function updatePetUI(){let st=stat(state.pet);$('#petName').textContent=DOGS[state.pet].name;$('#petMood').textContent=st.mood<35?'😞':st.mood<70?'🙂':'😊';$('#petFull').textContent=Math.round(st.full)}
+function enterHome(){activateAudio();show('#home');updatePetUI();startHomeMusic()}
+function choosePet(){let box=$('#dogGrid');box.innerHTML='';state.unlocked.forEach(i=>{let d=DOGS[i],b=document.createElement('button');b.className='dogItem';b.innerHTML=`<div class="shopArt"><canvas width="180" height="120"></canvas></div><b>${d.name}</b><span class="rarity ${d.rarity}">${rarityName(d.rarity)}</span>`;b.onclick=()=>{state.pet=i;save();updatePetUI();$('#collectionModal').style.display='none'};box.appendChild(b);let c=b.querySelector('canvas').getContext('2d');drawDog(c,90,70,88,i,0,true)});$('#collectionModal').style.display='flex'}
+function openHomeShop(type){$('#homeShopTitle').textContent=type==='food'?'选择食物':'选择装修';let box=$('#homeShopGrid');box.innerHTML='';ITEMS.filter(x=>x.type===type&&(type!=='decor'||x.room===state.room)).forEach(it=>{let owned=state.inventory[it.id]||0,b=document.createElement('button');b.className='invItem';b.innerHTML=`<div class="shopArt">${it.icon}</div><b>${it.name}</b><small>拥有 ${owned}</small><span class="rarity ${it.rarity}">${rarityName(it.rarity)}</span><div>${it.price} 🏡</div>`;b.onclick=()=>{if(owned>0)useHomeItem(it);else if(state.homeCoins>=it.price){state.homeCoins-=it.price;state.inventory[it.id]=(state.inventory[it.id]||0)+1;save();toast('已购买，点击一次才会使用');openHomeShop(type)}else toast('狗币不够')};box.appendChild(b)});$('#homeShopModal').style.display='flex'}
+function useHomeItem(it){if(it.type==='food'){let st=stat(state.pet);st.full=Math.min(100,st.full+it.full);st.mood=Math.min(100,st.mood+8);state.inventory[it.id]--;toast(DOGS[state.pet].name+'正在吃 '+it.name);tone(520,.12,'sine',.025);setTimeout(()=>tone(660,.12,'sine',.02),120)}else{state.placed[state.room].push({id:it.id,x:petCanvas.clientWidth*.5,y:petCanvas.clientHeight*.7,rot:0});state.inventory[it.id]--;toast('已放入场景，可拖动摆放')}save();updatePetUI();openHomeShop(it.type)}
+function renderCollection(){let box=$('#dogGrid');box.innerHTML='';DOGS.forEach((d,i)=>{let unlocked=state.unlocked.includes(i),b=document.createElement('div');b.className='dogItem';b.innerHTML=`<div class="shopArt"><canvas width="180" height="120"></canvas></div><b>${unlocked?d.name:'未解锁犬种'}</b><span class="rarity ${d.rarity}">${rarityName(d.rarity)}</span>`;box.appendChild(b);let c=b.querySelector('canvas').getContext('2d');if(unlocked)drawDog(c,90,70,88,i,0,true);else{c.fillStyle='#fff';c.font='bold 54px sans-serif';c.textAlign='center';c.fillText('?',90,78)}});$('#collectionModal').style.display='flex'}
+
+$('#startRun').onclick=startRun;$('#openHome').onclick=enterHome;$('#openCollection').onclick=renderCollection;
+$('#leaveRun').onclick=()=>{if(run&&run.layer>0){state.homeCoins+=run.pendingHome;save()}run=null;clearInterval(musicTimer);show('#menu')};
+$('#leaveHome').onclick=()=>{clearInterval(homeTimer);show('#menu')};
+$('#switchPet').onclick=choosePet;$('#feedBtn').onclick=()=>openHomeShop('food');$('#decorateBtn').onclick=()=>openHomeShop('decor');$('#inventoryBtn').onclick=()=>toast('仓库共有 '+Object.values(state.inventory).reduce((a,b)=>a+b,0)+' 件物品');
+$('#petBtn').onclick=()=>{let st=stat(state.pet);st.mood=Math.min(100,st.mood+10);save();updatePetUI();toast('摸摸 '+DOGS[state.pet].name);tone(600,.12,'sine',.02)};
+$('#musicBtn').onclick=()=>{musicOn=!musicOn;$('#musicBtn').textContent=musicOn?'🎵':'🔇';startRunMusic()};
+$('#homeMusicBtn').onclick=()=>{homeMusicOn=!homeMusicOn;$('#homeMusicBtn span').textContent=homeMusicOn?'🎵':'🔇';startHomeMusic()};
+$$('.homeTabs button').forEach(b=>b.onclick=()=>{$$('.homeTabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.room=b.dataset.room;save()});
+$$('.closeModal').forEach(b=>b.onclick=()=>b.closest('.modal').style.display='none');
+$$('.slotBtn').forEach(b=>b.onclick=()=>{currentSlot=+b.dataset.slot;state=loadSlot(currentSlot);normalizePlaced();save();toast('已切换到档位 '+currentSlot)});
+
+function frame(t){let dt=Math.min(.025,(t-last)/1000);last=t;physics(dt);drawBattle();petTime+=.04;drawRoom();requestAnimationFrame(frame)}
+resize();requestAnimationFrame(frame);
+setInterval(()=>{let st=stat(state.pet);st.full=Math.max(0,st.full-.5);if(st.full<25)st.mood=Math.max(0,st.mood-.3);save();updatePetUI()},60000);
+})();
+</script>
+</body>
+</html>
