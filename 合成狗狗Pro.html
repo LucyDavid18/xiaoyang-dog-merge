@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#ffd9e8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="合成狗狗">
+<title>合成狗狗 Pro</title>
+<style>
+:root{
+  --ink:#6b4d43; --pink:#ffd9e8; --cream:#fff8ec; --card:#fffdf8;
+  --shadow:rgba(92,61,55,.18);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{
+  margin:0;width:100%;height:100%;overflow:hidden;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  color:var(--ink);background:linear-gradient(180deg,#ffe5ef,#fff5df);
+  overscroll-behavior:none;touch-action:none;
+}
+body{display:flex;justify-content:center}
+#app{
+  width:min(100vw,520px);height:100dvh;display:flex;flex-direction:column;
+  padding:max(8px,env(safe-area-inset-top)) 10px max(8px,env(safe-area-inset-bottom));
+}
+.top{
+  height:94px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px
+}
+.brand h1{font-size:25px;margin:0;letter-spacing:.5px;text-shadow:0 2px 0 #fff}
+.brand p{margin:4px 0 0;font-size:12px;opacity:.72}
+.scorebar{display:flex;gap:7px}
+.score{
+  min-width:66px;background:#fff9;border:2px solid #fff;border-radius:16px;
+  padding:7px 10px;text-align:center;box-shadow:0 5px 15px var(--shadow)
+}
+.score strong{display:block;font-size:18px;line-height:1}.score span{font-size:10px;opacity:.7}
+#stage{
+  position:relative;flex:1;min-height:0;overflow:hidden;border-radius:28px 28px 18px 18px;
+  border:4px solid #fff;box-shadow:0 12px 26px var(--shadow),inset 0 0 0 2px #e7bfa3;
+  background:
+    radial-gradient(circle at 15% 10%,rgba(255,255,255,.75) 0 2px,transparent 3px),
+    radial-gradient(circle at 85% 20%,rgba(255,255,255,.65) 0 3px,transparent 4px),
+    repeating-linear-gradient(45deg,#fcebd8 0 22px,#fff2e0 22px 44px);
+}
+canvas{width:100%;height:100%;display:block}
+#danger{
+  position:absolute;left:0;right:0;top:88px;border-top:2px dashed rgba(221,91,124,.7);
+  pointer-events:none
+}
+#danger:after{
+  content:"危险线";position:absolute;right:10px;top:-18px;font-size:11px;
+  background:#fff9;padding:1px 6px;border-radius:8px;color:#c85b76
+}
+#next{
+  position:absolute;z-index:3;top:10px;left:10px;background:#fff9;border:2px solid #fff;
+  border-radius:14px;padding:6px 10px;font-size:11px;box-shadow:0 4px 12px var(--shadow)
+}
+#nextFace{display:inline-block;width:28px;height:28px;vertical-align:middle;margin-left:5px}
+#aim{position:absolute;top:0;width:2px;height:88px;pointer-events:none;background:linear-gradient(#bb7890,transparent)}
+#hint{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;transition:.3s
+}
+#hint span{
+  background:#fffbe8e8;border:2px solid #fff;border-radius:18px;padding:10px 14px;
+  font-size:13px;box-shadow:0 5px 16px var(--shadow)
+}
+.bottom{
+  height:72px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px
+}
+.tip{font-size:11px;line-height:1.35;opacity:.7}
+button{
+  border:0;border-radius:16px;background:#fff;color:var(--ink);font-weight:700;font-size:14px;
+  padding:11px 16px;box-shadow:0 5px 15px var(--shadow)
+}
+button:active{transform:translateY(1px)}
+#overlay{
+  position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+  padding:22px;background:rgba(78,53,48,.42);z-index:20
+}
+.panel{
+  width:min(360px,92vw);background:#fffaf2;border:4px solid #fff;border-radius:28px;
+  padding:24px;text-align:center;box-shadow:0 20px 55px rgba(0,0,0,.22)
+}
+.panel h2{margin:7px 0}.panel p{margin:8px 0 17px}.trophy{font-size:56px}
+#combo{
+  position:absolute;left:50%;top:112px;transform:translateX(-50%) scale(.8);
+  font-weight:900;font-size:24px;color:#d45f7d;text-shadow:0 2px #fff;
+  opacity:0;pointer-events:none
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top">
+    <div class="brand">
+      <h1>🐾 合成狗狗 Pro</h1>
+      <p>相同狗狗碰在一起，就会进化！</p>
+    </div>
+    <div class="scorebar">
+      <div class="score"><strong id="score">0</strong><span>本局</span></div>
+      <div class="score"><strong id="best">0</strong><span>最高</span></div>
+    </div>
+  </div>
+
+  <div id="stage">
+    <div id="next">下一个 <canvas id="nextFace" width="56" height="56"></canvas></div>
+    <div id="danger"></div>
+    <div id="aim"></div>
+    <div id="combo"></div>
+    <canvas id="game"></canvas>
+    <div id="hint"><span>左右移动手指，松开投放狗狗 🐾</span></div>
+  </div>
+
+  <div class="bottom">
+    <div class="tip">奶狗 → 柯基 → 柴犬 → 比熊 → 金毛<br>→ 哈士奇 → 萨摩耶 → 阿拉斯加 → 狗狗之王</div>
+    <button id="restart">重新开始</button>
+  </div>
+</div>
+
+<div id="overlay">
+  <div class="panel">
+    <div class="trophy">🐶</div>
+    <h2>狗狗挤满啦！</h2>
+    <p>本局得分：<strong id="finalScore">0</strong></p>
+    <button id="again">再玩一次</button>
+  </div>
+</div>
+
+<script>
+(()=>{
+'use strict';
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const stage=document.getElementById('stage'),aim=document.getElementById('aim');
+const scoreEl=document.getElementById('score'),bestEl=document.getElementById('best');
+const nextCanvas=document.getElementById('nextFace'),nctx=nextCanvas.getContext('2d');
+const hint=document.getElementById('hint'),overlay=document.getElementById('overlay');
+const finalScore=document.getElementById('finalScore'),comboEl=document.getElementById('combo');
+
+const DOGS=[
+ {name:'奶狗',r:18,fur:'#f7d7b3',ear:'#d7a16f',muzzle:'#fff2de',mark:'#fffaf0'},
+ {name:'柯基',r:24,fur:'#eaa45f',ear:'#b96c42',muzzle:'#fff1dd',mark:'#fff8e9'},
+ {name:'柴犬',r:31,fur:'#d98b52',ear:'#a75f38',muzzle:'#ffe7cc',mark:'#fff4e4'},
+ {name:'比熊',r:39,fur:'#fff7eb',ear:'#e8d9ca',muzzle:'#fffdf8',mark:'#f6eadf'},
+ {name:'金毛',r:48,fur:'#e6b75e',ear:'#bd7d3c',muzzle:'#f6dca7',mark:'#fff2cd'},
+ {name:'哈士奇',r:59,fur:'#aeb7c1',ear:'#6f7b88',muzzle:'#fff8ef',mark:'#697583'},
+ {name:'萨摩耶',r:71,fur:'#fffaf2',ear:'#e9ddd2',muzzle:'#fff',mark:'#f0e7df'},
+ {name:'阿拉斯加',r:84,fur:'#6f7077',ear:'#42444b',muzzle:'#eee8e1',mark:'#34363d'},
+ {name:'狗狗之王',r:98,fur:'#c58b55',ear:'#85532f',muzzle:'#f3d5aa',mark:'#fff0c9'}
+];
+
+let W=0,H=0,dpr=1,balls=[],particles=[];
+let currentType=0,nextType=0,dropX=120,score=0,best=+(localStorage.getItem('dogMergeProBest')||0);
+let dragging=false,gameOver=false,last=performance.now(),dangerTime=0,combo=0,comboTimer=0;
+bestEl.textContent=best;
+
+function resize(){
+ const r=canvas.getBoundingClientRect();dpr=Math.min(devicePixelRatio||1,2);
+ W=r.width;H=r.height;canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
+ ctx.setTransform(dpr,0,0,dpr,0,0);dropX=dropX||W/2;dropX=Math.min(W-30,Math.max(30,dropX));aim.style.left=(dropX-1)+'px'
+}
+new ResizeObserver(resize).observe(stage);
+
+function starter(){const a=[0,0,0,0,1,1,1,2];return a[(Math.random()*a.length)|0]}
+function reset(){
+ balls=[];particles=[];score=0;dangerTime=0;combo=0;comboTimer=0;gameOver=false;
+ currentType=starter();nextType=starter();dropX=W/2;hint.style.opacity='1';overlay.style.display='none';
+ updateUI()
+}
+function updateUI(){
+ scoreEl.textContent=score;bestEl.textContent=best;drawDog(nctx,28,28,22,nextType,0,true)
+}
+
+function drawDog(c,x,y,r,t,rot=0,clear=false){
+ const d=DOGS[t];if(clear)c.clearRect(0,0,56,56);
+ c.save();c.translate(x,y);c.rotate(rot);
+ c.shadowColor='rgba(71,46,40,.18)';c.shadowBlur=Math.max(2,r*.13);c.shadowOffsetY=r*.08;
+ c.fillStyle=d.ear;
+ c.beginPath();c.ellipse(-r*.55,-r*.48,r*.28,r*.46,-.35,0,Math.PI*2);c.fill();
+ c.beginPath();c.ellipse(r*.55,-r*.48,r*.28,r*.46,.35,0,Math.PI*2);c.fill();
+ c.fillStyle=d.fur;c.beginPath();c.arc(0,0,r,0,Math.PI*2);c.fill();
+ c.shadowColor='transparent';
+ if(t===2||t===5||t===7){
+   c.fillStyle=d.mark;
+   c.beginPath();c.moveTo(-r*.8,-r*.45);c.quadraticCurveTo(-r*.25,-r*.75,0,-r*.12);
+   c.quadraticCurveTo(r*.25,-r*.75,r*.8,-r*.45);c.lineTo(r*.55,r*.15);
+   c.quadraticCurveTo(0,-r*.05,-r*.55,r*.15);c.closePath();c.fill()
+ }
+ c.fillStyle=d.muzzle;c.beginPath();c.ellipse(0,r*.22,r*.48,r*.36,0,0,Math.PI*2);c.fill();
+ c.fillStyle='#4d3933';c.beginPath();c.arc(-r*.32,-r*.1,r*.075,0,Math.PI*2);c.fill();
+ c.beginPath();c.arc(r*.32,-r*.1,r*.075,0,Math.PI*2);c.fill();
+ c.fillStyle='#3d2f2b';c.beginPath();c.ellipse(0,r*.13,r*.13,r*.1,0,0,Math.PI*2);c.fill();
+ c.strokeStyle='#6b4d43';c.lineWidth=Math.max(1.3,r*.035);c.lineCap='round';
+ c.beginPath();c.moveTo(0,r*.22);c.quadraticCurveTo(-r*.14,r*.36,-r*.29,r*.28);c.stroke();
+ c.beginPath();c.moveTo(0,r*.22);c.quadraticCurveTo(r*.14,r*.36,r*.29,r*.28);c.stroke();
+ if(t===8){
+   c.fillStyle='#f2c94c';
+   for(let i=0;i<5;i++){let a=-Math.PI*.9+i*Math.PI*.45;c.beginPath();c.arc(Math.cos(a)*r*.8,Math.sin(a)*r*.8-r*.1,r*.16,0,Math.PI*2);c.fill()}
+ }
+ c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=Math.max(2,r*.055);c.beginPath();c.arc(0,0,r,0,Math.PI*2);c.stroke();
+ c.restore()
+}
+
+let audio;
+function beep(freq,dur=.08,type='sine',vol=.035){
+ try{
+  audio ||= new (window.AudioContext||window.webkitAudioContext)();
+  let o=audio.createOscillator(),g=audio.createGain();o.type=type;o.frequency.value=freq;g.gain.value=vol;
+  o.connect(g);g.connect(audio.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+dur);o.stop(audio.currentTime+dur)
+ }catch(e){}
+}
+function vibrate(ms){try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}}
+
+function drop(){
+ if(gameOver)return;const d=DOGS[currentType];
+ balls.push({x:Math.max(d.r+3,Math.min(W-d.r-3,dropX)),y:36,vx:0,vy:0,type:currentType,r:d.r,born:performance.now(),rot:(Math.random()-.5)*.15,pop:0});
+ currentType=nextType;nextType=starter();hint.style.opacity='0';beep(245,.045,'sine',.02);updateUI()
+}
+function burst(x,y,t){
+ for(let i=0;i<12;i++)particles.push({x,y,vx:(Math.random()-.5)*210,vy:-40-Math.random()*180,life:.7,s:3+Math.random()*5,t})
+}
+function showCombo(){
+ if(combo<2)return;comboEl.textContent='COMBO × '+combo;comboEl.style.opacity='1';comboEl.style.transform='translateX(-50%) scale(1)';
+ clearTimeout(showCombo.timer);showCombo.timer=setTimeout(()=>{comboEl.style.opacity='0';comboEl.style.transform='translateX(-50%) scale(.8)'},650)
+}
+function merge(a,b){
+ if(a.type!==b.type)return false;let t=a.type,x=(a.x+b.x)/2,y=(a.y+b.y)/2;
+ balls=balls.filter(q=>q!==a&&q!==b);score+=10*(t+1)*(t+1);combo++;comboTimer=.85;showCombo();burst(x,y,t);
+ beep(390+t*65,.12,'triangle',.045);vibrate(18);
+ if(t<DOGS.length-1){let nt=t+1;balls.push({x,y,vx:(a.vx+b.vx)/2,vy:-90,type:nt,r:DOGS[nt].r,born:performance.now(),rot:0,pop:1})}
+ else{score+=2000;beep(900,.28,'sine',.06);vibrate([40,40,80])}
+ if(score>best){best=score;localStorage.setItem('dogMergeProBest',best)}updateUI();return true
+}
+
+function physics(dt){
+ if(comboTimer>0){comboTimer-=dt;if(comboTimer<=0)combo=0}
+ const g=980;
+ for(const b of balls){
+  b.vy+=g*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;b.vx*=Math.pow(.994,dt*60);b.rot+=b.vx*.000025;
+  if(b.x-b.r<2){b.x=b.r+2;b.vx=Math.abs(b.vx)*.45}
+  if(b.x+b.r>W-2){b.x=W-b.r-2;b.vx=-Math.abs(b.vx)*.45}
+  if(b.y+b.r>H-3){b.y=H-b.r-3;b.vy=-Math.abs(b.vy)*.24;b.vx*=.82;if(Math.abs(b.vy)<18)b.vy=0}
+  if(b.pop>0)b.pop=Math.max(0,b.pop-dt*4)
+ }
+ for(let iter=0;iter<4;iter++){
+  let merged=false;
+  outer:for(let i=0;i<balls.length;i++)for(let j=i+1;j<balls.length;j++){
+   const a=balls[i],b=balls[j],dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy)||.001,min=a.r+b.r;
+   if(dist<min){
+    if(a.type===b.type&&performance.now()-a.born>80&&performance.now()-b.born>80){merged=merge(a,b);if(merged)break outer}
+    let nx=dx/dist,ny=dy/dist,over=min-dist,total=a.r*a.r+b.r*b.r,wa=b.r*b.r/total,wb=a.r*a.r/total;
+    a.x-=nx*over*wa;b.x+=nx*over*wb;a.y-=ny*over*wa;b.y+=ny*over*wb;
+    let rv=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;if(rv<0){let imp=-rv*.4;a.vx-=imp*nx*wa;b.vx+=imp*nx*wb;a.vy-=imp*ny*wa;b.vy+=imp*ny*wb}
+   }
+  }
+  if(merged)continue
+ }
+ for(const p of particles){p.vy+=380*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt}
+ particles=particles.filter(p=>p.life>0);
+ let crowded=balls.some(b=>performance.now()-b.born>1400&&b.y-b.r<88&&Math.hypot(b.vx,b.vy)<80);
+ dangerTime=crowded?dangerTime+dt:Math.max(0,dangerTime-dt*2.4);if(dangerTime>2.2)endGame()
+}
+
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ const d=DOGS[currentType];ctx.save();ctx.globalAlpha=.94;drawDog(ctx,dropX,35,d.r,currentType,0,false);ctx.restore();
+ balls.sort((a,b)=>a.y-b.y);
+ for(const b of balls){ctx.save();let sc=b.pop?1+Math.sin((1-b.pop)*Math.PI)*.17:1;ctx.translate(b.x,b.y);ctx.scale(sc,sc);ctx.translate(-b.x,-b.y);drawDog(ctx,b.x,b.y,b.r,b.type,b.rot,false);ctx.restore()}
+ for(const p of particles){ctx.save();ctx.globalAlpha=Math.max(0,p.life/.7);ctx.fillStyle=['#ffd166','#ff91b3','#fff','#9ad8ff'][p.t%4];ctx.beginPath();ctx.arc(p.x,p.y,p.s,0,Math.PI*2);ctx.fill();ctx.restore()}
+ if(dangerTime>0){ctx.fillStyle=`rgba(255,90,120,${Math.min(.14,dangerTime*.06)})`;ctx.fillRect(0,0,W,90)}
+}
+function endGame(){gameOver=true;finalScore.textContent=score;overlay.style.display='flex';beep(160,.35,'sawtooth',.025);vibrate([70,50,70])}
+function loop(t){let dt=Math.min(.026,(t-last)/1000);last=t;if(!gameOver)physics(dt);draw();requestAnimationFrame(loop)}
+
+function px(e){let r=canvas.getBoundingClientRect(),p=e.touches?e.touches[0]:e;return p.clientX-r.left}
+function start(e){if(gameOver)return;dragging=true;move(e);e.preventDefault()}
+function move(e){if(!dragging)return;let d=DOGS[currentType];dropX=Math.max(d.r+4,Math.min(W-d.r-4,px(e)));aim.style.left=(dropX-1)+'px';e.preventDefault()}
+function end(e){if(!dragging)return;dragging=false;drop();e.preventDefault()}
+canvas.addEventListener('touchstart',start,{passive:false});canvas.addEventListener('touchmove',move,{passive:false});canvas.addEventListener('touchend',end,{passive:false});
+canvas.addEventListener('mousedown',start);addEventListener('mousemove',move);addEventListener('mouseup',end);
+document.getElementById('restart').onclick=reset;document.getElementById('again').onclick=reset;
+resize();reset();requestAnimationFrame(loop)
+})();
+</script>
+</body>
+</html>
